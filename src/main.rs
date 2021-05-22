@@ -18,7 +18,7 @@ async fn main() {
 }
 
 async fn run() {
-    let ten_seconds = time::Duration::from_secs(5);
+    let ten_seconds = time::Duration::from_secs(10);
     let mut last_operation: BinanceInfo = BinanceInfo {
         block: 0,
         date: "".to_string(),
@@ -61,7 +61,7 @@ async fn run() {
 
 async fn get_new_operation() -> Result<BinanceInfo, Box<dyn std::error::Error>> {
     let responce = reqwest::get(
-        "https://bitinfocharts.com/ruУ/bitcoin/address/34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo",
+        "https://bitinfocharts.com/ru/bitcoin/address/34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo",
     )
     .await;
 
