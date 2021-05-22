@@ -4,9 +4,6 @@ use std::{thread, time};
 
 use teloxide::prelude::*;
 
-use reqwest;
-use scraper;
-
 #[derive(Debug, Clone, PartialEq)]
 struct BinanceInfo {
     block: i128,
@@ -64,7 +61,7 @@ async fn run() {
 
 async fn get_new_operation() -> Result<BinanceInfo, Box<dyn std::error::Error>> {
     let responce = reqwest::get(
-        "https://bitinfocharts.com/ru/bitcoin/address/34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo",
+        "https://bitinfocharts.com/ruУ/bitcoin/address/34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo",
     )
     .await;
 
