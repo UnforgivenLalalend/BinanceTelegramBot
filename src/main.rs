@@ -37,7 +37,14 @@ async fn run() {
     let bot = Bot::from_env().auto_send();
 
     loop {
-        let possible_new_operation: BinanceInfo = new_operation().await;
+        let possible_new_operation: BinanceInfo = match get_new_operation().await {
+            Ok(new_operation) => new_operation,
+            Err(err) => {
+                log::info!("Failed to get new operation due to: {}", err);
+                continue;
+            }
+        };
+
         if last_operation != possible_new_operation {
             last_operation = possible_new_operation;
 
@@ -55,26 +62,33 @@ async fn run() {
     }
 }
 
-async fn new_operation() -> BinanceInfo {
+async fn get_new_operation() -> Result<BinanceInfo, Box<dyn std::error::Error>> {
     let responce = reqwest::get(
         "https://bitinfocharts.com/ru/bitcoin/address/34xp4vRoCGJym3xR7yCVPFHoCNxv4Twseo",
     )
-    .await
-    .unwrap()
-    .text()
-    .await
-    .unwrap();
+    .await;
 
-    let fragment = scraper::Html::parse_fragment(responce.as_str());
-    let tr_selector = scraper::Selector::parse("tr.trb").unwrap();
+    let responce = responce?;
 
-    let tr = fragment.select(&tr_selector).next().unwrap();
-    let text = tr.text().collect::<Vec<_>>();
+    if responce.status().is_success() {
+        let text = responce.text().await?;
 
-    BinanceInfo {
-        block: text[0].parse::<i128>().unwrap(),
-        date: text[1].to_string(),
-        sum: text[3].to_string(),
-        balance: text[5].to_string(),
+        let fragment = scraper::Html::parse_fragment(text.as_str());
+        let tr_selector = scraper::Selector::parse("tr.trb").unwrap();
+
+        let tr = fragment.select(&tr_selector).next().unwrap();
+        let text = tr.text().collect::<Vec<_>>();
+
+        return Ok(BinanceInfo {
+            block: text[0].parse::<i128>().unwrap(),
+            date: text[1].to_string(),
+            sum: text[3].to_string(),
+            balance: text[5].to_string(),
+        });
     }
+    if responce.status().is_client_error() {
+        return Err("BAD REQUEST".into());
+    }
+
+    Err("Something Went Wrong...".into())
 }
