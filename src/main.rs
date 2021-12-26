@@ -56,9 +56,9 @@ async fn run() {
             Some(_) => {}
         }
         
-	if latest_operation.transfer_amount.parse::<f64>().unwrap() < 100. {
-	    continue;
-	}
+    	if latest_operation.transfer_amount.contains(",") {
+	        continue;
+	    }
         
         let telegram_text = format!(
             "На сайте появилась новая транзакция!\nБлок: {}\nДата: {}\nСумма: {}\nТекущий баланс: {} BTC",
